@@ -26,7 +26,7 @@ class Perceptron():
 	def calculate_f_face(self, xi): 
 		f_xi_weights = 0
 		for i in range(len(xi)):
-			f_xi_weights = f_xi_weights + (self.weights[i] * xi[i])
+			f_xi_weights += (self.weights[i] * xi[i])
 		# add our last feature to the end, the newest one 
 		f_xi_weights += xi[-1]
 		return f_xi_weights
@@ -48,13 +48,12 @@ class Perceptron():
 			updated[len(xi)] = 1 + self.weights[-1] 
 		return updated
 
-
 	'''
 		compares values of the final final guesses with the actual ys
 		0 -> <= 0 is correct (is not an image) 
 		1 -> >= 0 is correct (is an image) 
 	'''
-	def percentage_correct(self, guesses): 
+	def percentage_correct_face(self, guesses): 
 		correct = 0
 		total = len(self.y_values)
 		for i in range(len(self.y_values)): 
@@ -91,35 +90,53 @@ class Perceptron():
 			current_image = []
 			for j in range(pixels): 
 				current_image.append(flattened[flattened_index])
-				flattened_index += 1
-			# now, we have current image, so calculate weights
-			guess = calculate_f(self, current_image)
+				flattened_index += 1			# now, we have current image, so calculate weights
+			guess = calculate_f_face(self, current_image)
 			
 			# if not face and we are positive, have to subtract 
 			if (self.y_values[i] == 0) and (guess >= 0): 
 				add = False
 				while (guess >= 0): 
-				# update the weights
-				self.weights = update_weights(self, current_image, add) 
-				# then, recalculate
-				guess = calculate_f(self, current_image)
+					# update the weights
+					self.weights = update_weights_face(self, current_image, add) 
+					# then, recalculate
+					guess = calculate_f_face(self, current_image)
 			
 			# if face and we are negative, have to subtract 
 			elif (self.y_values[i] == 1) and (guess <= 0): 
 				add = True
 				while (guess <= 0): 
-				# update the weights
-				self.weights = update_weights(self, current_image, add) 
-				# then, recalculate
-				guess = calculate_f(self, current_image)
+					# update the weights
+					self.weights = update_weights_face(self, current_image, add) 
+					# then, recalculate
+					guess = calculate_f_face(self, current_image)
 			guesses[i] = guess
 		# now calculate percentage correct
-		percent_correct = percentage_correct(self, guesses)
+		percent_correct = percentage_correct_face(self, guesses)
 		return percent_correct
 			
 
 
-	def predict(self, x_input): 
-		pass
+	def predict_face(self, x_input): 
+		# assign x and y values, flatten the list of lists
+		x, y = x_input
+		flattened = [j for i in x for j in i]
+
+		guess = 0
+		for i in range(len(flattened)): 
+			guess += (self.weights[i] * flattened[i])
+		guess += self.weights(len(flattened))
+
+		# if it should NOT be a face
+		if y == 0: 
+			if guess <= 0: 
+				return true
+
+		# if it SHOULD be a face
+		elif y == 1: 
+			if guess >= 0: 
+				return true
+
+		return false
 
 		
