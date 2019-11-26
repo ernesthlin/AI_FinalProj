@@ -7,18 +7,6 @@ class Perceptron():
 		self.y_values = y
 		self.weights = weights
 		self.digit_weights = digit_weights
-	'''
-		flatten the image into a single list of size 4072
-		X_train is a list of [([0,1,2..],y),([1,0,2...],y1),([1,2,0...],y2)..]
-	'''
-	# def flatten_list(self, X_train): 
-	# 	# convert list of training data into a flattened list, extract the y values
-	# 	x_list = [i for i, j in X_train]
-	# 	self.y_values = [j for i, j in X_train]
-	# 	# get every image, flatten from list of [[]] to list of [], to list of ints
-	# 	list_of_images = [j for i in x_list for j in i]
-	# 	flattened = [j for i in list_of_images for j in i]
-	# 	return flattened
 
 ##########################################################################################################
 										
@@ -85,13 +73,10 @@ class Perceptron():
 		- f(xi, weights) = w0 + w1*o(xi) + w2*o(xi) + w3*o(xi)... + w4072*o(xi)
 	'''
 	def train_face(self, X_train, y_train): 
-		count = 0
 		pixels = 70 * 61 # face image pixels
 		self.weights = [0 for i in range(pixels+1)]
 		self.y_values = y_train
-
 		# now itterate through the flattened list, and do the training on each image
-		flattened_index = 0
 		guess = 0
 		guesses = []
 		for i in range(len(X_train)):
@@ -133,25 +118,6 @@ class Perceptron():
 		percent_correct = self.percentage_correct_face(guesses)
 		return percent_correct
 
-		# # assign x and y values, flatten the list of lists
-		# x, y = x_input
-		# flattened = [j for i in x for j in i]
-
-		# guess = 0
-		# for i in range(len(flattened)): 
-		# 	guess += (self.weights[i] * flattened[i])
-		# guess += self.weights(len(flattened))
-
-		# # if it should NOT be a face
-		# if y == 0: 
-		# 	if guess <= 0: 
-		# 		return 1
-		# # if it SHOULD be a face
-		# elif y == 1: 
-		# 	if guess >= 0: 
-		# 		return 1
-		# return 0
-
 ##########################################################################################################
 											
 										# Digit Functions  		
@@ -165,14 +131,23 @@ class Perceptron():
 		Returns the index of the max f value, or the 'digit' that we have guessed with the highest certainty 
 	'''
 	def calculate_f_digit(self, xi): 
+		#print("length of the list at : " + str(i) + " " + str(self.digit_weights[i][-1]))
 		f_digits = []
-		for i in range(len(f_digits)):
+		for i in range(10):
+			#print("i = " + str(i))
+			#print("length of the list at : " + str(i) + " " + str(len(self.digit_weights[i])))
 			sum = 0
 			for j in range(len(xi)):
+				#print("j = " + str(j) + " xi[j]: " + str(xi[j]))
 				sum += (self.digit_weights[i][j] * xi[j])
 			sum += self.digit_weights[i][-1]
-			f_digits[i] = sum
-		return f_digits.index(max(f_digits))
+			#print("sum = " + str(sum))
+			f_digits.append(sum)
+		maxInt = f_digits.index(max(f_digits))
+		#print("the f is " + str(maxInt))
+		#print(self.digit_weights)
+		return maxInt
+
 
 	'''
 		If correct guess, move on. 
@@ -180,22 +155,41 @@ class Perceptron():
 			1. The incorrect guess's weights must be either decremented by each of its features
 			2. The weights for the correct digit's weights must be incremented, the opposite of step 1 
 	'''
-	def check_guess_accuracy_and_update(self, guess, index, xi): 
-		if self.y_values[index] != guess: 
-			# decrement incorrect 
-			self.digit_weights[guess] = [self.digit_weights[guess][i] - xi[i] for i in range(len(self.digit_weights[guess]))-1]
-			self.digit_weights[guess][-1] = 1 - self.digit_weights[guess][-1]
+	def check_guess_accuracy_and_update(self, guess, y, xi): 
+		multiplier = 1 # 1 default, % with .9
+		print(" guess is " + str(guess) + " y is " + str(y))
+		#print(" guess is " + str(guess))
+		
+		self.digit_weights[guess].clear()
+		self.digit_weights[y].clear()
 
-			# increment correct
-			self.digit_weights[index] = [self.digit_weights[index][i] + xi[i] for i in range(len(self.digit_weights[index]))-1]
-			self.digit_weights[index][-1] += 1
+		add_to_guesses = []
+		add_to_ys = []
+		
+		print(self.digit_weights[guess][0])
+
+		if y == guess: 
+			return True
+		else: 
+			for j in range(len(xi)):
+				print("j is : " + str(j))
+				print(self.digit_weights[guess][0])
+				#print("the xi is " + str(xi[j]) + " the weight guess is " + str(self.digit_weights[guess][j]))
+				add_to_guesses.append(self.digit_weights[guess][j] - (multiplier * xi[j]))
+				add_to_ys.append(self.digit_weights[y][j] + (multiplier * xi[j]))
+			add_to_guesses.append(self.digit_weights[guess][-1] - (multiplier*1))
+			add_to_ys.append(self.digit_weights[y][-1] + (multiplier*1))
+
+			self.digit_weights[guess] = add_to_guesses
+			self.digit_weights[y] = add_to_ys
 			return False
-		return True
+
 
 	def percentage_correct_digit(self, guesses): 
 		correct_zipped = list(zip(self.y_values, guesses))
 		correct = [i for i, j in correct_zipped if i == j]
 		return (len(correct)/len(self.y_values)) * 100
+
 
 	'''
 		weights will be of size 4720 + 1 (the w0 is the extra weight)
@@ -203,57 +197,67 @@ class Perceptron():
 			- our features are each individual pixel, and each pixel has either a 0, 1, or 2 (for numbers) 
 			- f(xi, weights) = w0 + w1*o(xi) + w2*o(xi) + w3*o(xi)... + w4072*o(xi)
 	'''
-	def train_digit(self, preProc): 
+	def train_digit(self, X_train, y_train): 
 		pixels = 28 * 29 # digit image pixels
-		# get flattened list
-		#flattened = self.flatten_list(X_train)
-		flattened = preProc.X
+		self.digit_weights = [[0] * (pixels+1)] * 10
+		self.y_values = y_train
 		# initialize the weights list, to be 1 more than the # pixels in the image
-		for i in range(10): 
-			self.digit_weights[i] = [0 for j in range(pixels+1)]
-
-		flattened_index = 0
+		guess = 0
 		guesses = []
 		for i in range(len(X_train)): 
-			current_image =[]
-			for j in range(pixels): 
-				current_image.append(flattened[flattened_index])
-				flattened_index += 1			
+			current_image = X_train[i]			
 			# Calculate the f value and assign the 'digit' we have guessed to guess
 			guess = self.calculate_f_digit(current_image)
-			check = self.check_guess_accuracy_and_update(guess, i, current_image)
-			while (check is False): 
-				guess = self.calculate_f_digit(current_image)
-				check = self.check_guess_accuracy_and_update(guess, i, current_image)
-			guesses[i] = guess
+			guesses.append(guess)
+			print(self.digit_weights[guess][0])
+			check = self.check_guess_accuracy_and_update(guess, self.y_values[i], current_image)
+			print("did first check")
+			# while (check is False): 
+			# 	guess = self.calculate_f_digit(current_image)
+			# 	check = self.check_guess_accuracy_and_update(guess, self.y_values[i], current_image)
 		percent_correct = self.percentage_correct_digit(guesses)
 		return percent_correct
 
-	def predict_digit(self, x_input): 
-		# assign x and y values, flatten the list of lists
-		x, y = x_input
-		flattened = [j for i in x for j in i]
 
-		digit = self.calculate_f_digit(flattened)
+	def predict_digit(self, X_Validation, y_Validation): 
+		self.y_values = y_Validation
+		guess = 0
+		guesses = []
+		for i in range(len(X_Validation)):
+			current_image = X_Validation[i]
+			# now, we have current image, so calculate the f value
+			guess = self.calculate_f_digit(current_image)
+			guesses.append(guess)
 
-		if digit == y: 
-			return true
-		else: 
-			return false
+		percent_correct = self.percentage_correct_digit(guesses)
+		return percent_correct
 
 # for testing purposes
 def main():
-	face_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrain", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrainlabels")
-	# create structure
-	perceptron = Perceptron([],[],[]) 
-	correct = perceptron.train_face(face_data.X, face_data.y)
-	print("The percentage correct on training data is " + str(correct))
+	# face_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrain", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrainlabels")
+	# # create structure
+	# perceptron = Perceptron([],[],[]) 
+	# correct = perceptron.train_face(face_data.X, face_data.y)
+	# print("The percentage correct on training data is " + str(correct))
 
 
-	face_data_validation = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidation", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidationlabels")
+	# face_data_validation = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidation", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidationlabels")
+	# # create structure
+	# correctV = perceptron.predict_face(face_data_validation.X, face_data_validation.y)
+	# print("The percentage correct on validation data is " + str(correctV))
+
+
+	digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/trainingimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/traininglabels")
 	# create structure
-	correctV = perceptron.predict_face(face_data_validation.X, face_data_validation.y)
-	print("The percentage correct on validation data is " + str(correctV))
+	perceptron_digit = Perceptron([],[],[]) 
+	correctd = perceptron_digit.train_digit(digit_data.X, digit_data.y)
+	print("The percentage correct on training data is " + str(correctd))
+
+
+	digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationlabels")
+	# create structure
+	correctVd = perceptron_digit.predict_digit(digit_data.X, digit_data.y)
+	print("The percentage correct on validation data is " + str(correctVd))
 
 
 
