@@ -9,10 +9,8 @@ class Perceptron():
 		self.weights = weights
 		self.digit_weights = digit_weights
 
-##########################################################################################################
-										
-										#Face Functions  		
-										
+##########################################################################################################						
+										#Face Functions  											
 ##########################################################################################################
 	'''
 		calculates 
@@ -106,7 +104,7 @@ class Perceptron():
 				correct = correct + 1
 			total = total + 1
 			pct_correct = correct / total
-		return pct_correct
+		return str(pct_correct * 100) + '%'
 			
 
 	def predict_face(self, X_Validation, y_Validation): 
@@ -120,12 +118,10 @@ class Perceptron():
 			guesses.append(guess)
 
 		percent_correct = self.percentage_correct_face(guesses)
-		return percent_correct
+		return str(percent_correct) + '%'
 
-##########################################################################################################
-											
-										# Digit Functions  		
-											
+##########################################################################################################				
+										# Digit Functions  										
 ##########################################################################################################
 	'''
 		Calculate f values for each digit 0-9 and take the max value
@@ -154,7 +150,7 @@ class Perceptron():
 			2. The weights for the correct digit's weights must be incremented, the opposite of step 1 
 	'''
 	def check_guess_accuracy_and_update(self, guess, y, xi): 
-		multiplier = 1 # 1 default, % with .9
+		multiplier = .5 # 81.2% validation w/ .5 with 99% accuracy on the training data
 		add_to_guesses = []
 		add_to_ys = []
 
@@ -206,7 +202,8 @@ class Perceptron():
 				correct += 1
 			total += 1
 			pct_correct = correct / total
-		return str(pct_correct * 100) + '%' + " accuracy for digit training data"
+			print(pct_correct)
+		return str(pct_correct * 100) + '%'
 
 
 	def predict_digit(self, X_Validation, y_Validation): 
@@ -220,7 +217,46 @@ class Perceptron():
 			guesses.append(guess)
 
 		percent_correct = self.percentage_correct_digit(guesses)
-		return str(percent_correct) + '%' + " accuracy for digit validation data"
+		return str(percent_correct) + '%' 
+
+
+##########################################################################################################							
+										# Statistic Functions  							
+##########################################################################################################
+
+	def get_percentage_of_train_face(self, dataX, dataY, data_valX, data_valY): 
+		random.seed(2)
+		acc = []
+		percent = 10
+		while percent <= 100: 
+			length = len(dataX) 
+			x_percent = int(length * percent/100)
+			
+			x_percent_dataX = []
+			x_percent_dataY = []
+			for i in range(0, x_percent):
+				num = random.randint(0, length-1)
+				x_percent_dataX.append(dataX[num])
+				x_percent_dataY.append(dataY[num])
+			# now run the training
+			correct = self.train_face(x_percent_dataX, x_percent_dataY)
+			
+			length_v = len(data_valX) 
+			x_percent_v = int(length_v * percent/100)
+
+			x_percent_dataX_v = []
+			x_percent_dataY_v = []
+			for i in range(0, x_percent_v):
+				num = random.randint(0, length_v-1)
+				x_percent_dataX_v.append(data_valX[num])
+				x_percent_dataY_v.append(data_valY[num])
+			# now run the validation
+			validation = self.predict_face(x_percent_dataX_v, x_percent_dataY_v)
+			item = validation[:3]
+			acc.append(item + "%")
+			percent += 10
+
+		return acc
 
 
 # for testing purposes
@@ -230,26 +266,51 @@ def main():
 	# perceptron = Perceptron([],[],[]) 
 	# correct = perceptron.train_face(face_data.X, face_data.y)
 	# print("The percentage correct on training data is " + str(correct))
+	# print('\n')
 
 
 	# face_data_validation = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidation", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidationlabels")
 	# # create structure
 	# correctV = perceptron.predict_face(face_data_validation.X, face_data_validation.y)
 	# print("The percentage correct on validation data is " + str(correctV))
+	# print('\n')
 
 
-	digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/trainingimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/traininglabels")
-	# create structure
-	perceptron_digit = Perceptron([],[],[]) 
-	correctd = perceptron_digit.train_digit(digit_data.X, digit_data.y)
-	print("The percentage correct on training data is " + correctd)
+	# # face test data
+	# test_face = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatest", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatestlabels")
+	# correct_test_f = perceptron.predict_face(test_face.X, test_face.y)
+	# print("The percentage correct on face test data is " + str(correct_test_f))
+	# print('\n')
 
 
-	digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationlabels")
-	# create structure
-	correctVd = perceptron_digit.predict_digit(digit_data.X, digit_data.y)
-	print("The percentage correct on validation data is " + correctVd)
+	face_data3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrain", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrainlabels")
+	face_data_validation3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidation", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidationlabels")
+	perceptron3 = Perceptron([],[],[]) 	
 
+	totals = perceptron3.get_percentage_of_train_face(face_data3.X, face_data3.y, face_data_validation3.X, face_data_validation3.y)
+	print(totals)
+
+
+	# digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/trainingimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/traininglabels")
+	# # create structure
+	# perceptron_digit = Perceptron([],[],[]) 
+	# correctd = perceptron_digit.train_digit(digit_data.X, digit_data.y)
+	# print("The percentage correct on training data is " + correctd)
+	# print('\n')
+
+
+	# digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationlabels")
+	# # create structure
+	# correctVd = perceptron_digit.predict_digit(digit_data.X, digit_data.y)
+	# print("The percentage correct on validation data is " + correctVd)
+	# print('\n')
+
+
+	# # digit test data
+	# test_digits = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/testimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/testlabels")
+	# correct_test_d = perceptron_digit.predict_digit(test_digits.X, test_digits.y)
+	# print("The percentage correct on digit test data is " + correct_test_d)
+	# print('\n')
 
 
 
