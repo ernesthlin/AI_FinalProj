@@ -1,6 +1,7 @@
 from preprocessing import PreProcessor
 import random
 import math
+import time
 
 class Perceptron():
 
@@ -191,7 +192,7 @@ class Perceptron():
 		correct = 0
 		total = 0
 		random.seed(2)
-		while pct_correct < 0.90:
+		while pct_correct < 0.95:
 			i = random.randint(0, len(X_train)-1)
 			current_image = X_train[i]			
 			# Calculate the f value and assign the 'digit' we have guessed to guess
@@ -228,8 +229,10 @@ class Perceptron():
 
 	# gets the percentages of face training data from 10% -> 100% and tests them on the validation data
 	def get_percentage_of_train_face(self, dataX, dataY, data_valX, data_valY): 
-		random.seed(2)
+		# random.seed(1)
+		start = time.time()
 		acc = []
+		time_list = []
 		percent = 10
 		while percent <= 100: 
 			length = len(dataX) 
@@ -247,15 +250,19 @@ class Perceptron():
 			validation = self.predict_face(data_valX, data_valY)
 			item = validation[:4]
 			acc.append(item)
-			print(item + "%")
+			# print(item + "%")
 			percent += 10
-		return acc
+			elapsed = time.time() - start
+			time_list.append(elapsed)
+		return acc, time_list
 
 
 	# gets the percentages of digit training data from 10% -> 100% and tests them on the validation data
 	def get_percentage_of_train_digit(self, dataX, dataY, data_valX, data_valY): 
-		random.seed(2)
+		# random.seed(1)
+		start = time.time()
 		acc = []
+		time_list = []
 		percent = 10
 		while percent <= 100: 
 			length = len(dataX) 
@@ -275,69 +282,80 @@ class Perceptron():
 			#print ("validation is : " + str(validation))
 			item = validation[:4]
 			acc.append(item)
-			print(item + "%")
+			# print(item + "%")
 			percent += 10
-		return acc
+			elapsed = time.time() - start
+			time_list.append(elapsed)
+		return acc, time_list
 
 
 # for testing purposes
 def main():
-	# face_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrain", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrainlabels")
-	# # create structure
-	# perceptron = Perceptron([],[],[]) 
-	# correct = perceptron.train_face(face_data.X, face_data.y)
-	# print("The percentage correct on training data is " + str(correct))
-	# print('\n')
+	random.seed(1)
+	face_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrain", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrainlabels")
+	# create structure
+	perceptron = Perceptron([],[],[]) 
+	correct = perceptron.train_face(face_data.X, face_data.y)
+	print("The percentage correct on training data is " + str(correct))
+	print('\n')
 
 
-	# face_data_validation = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidation", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidationlabels")
-	# # create structure
-	# correctV = perceptron.predict_face(face_data_validation.X, face_data_validation.y)
-	# print("The percentage correct on validation data is " + str(correctV))
-	# print('\n')
+	face_data_validation = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidation", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidationlabels")
+	# create structure
+	correctV = perceptron.predict_face(face_data_validation.X, face_data_validation.y)
+	print("The percentage correct on validation data is " + str(correctV))
+	print('\n')
 
 
-	# # face test data
-	# test_face = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatest", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatestlabels")
-	# correct_test_f = perceptron.predict_face(test_face.X, test_face.y)
-	# print("The percentage correct on face test data is " + str(correct_test_f))
-	# print('\n')
+	# face test data
+	test_face = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatest", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatestlabels")
+	correct_test_f = perceptron.predict_face(test_face.X, test_face.y)
+	print("The percentage correct on face test data is " + str(correct_test_f))
+	print('\n')
+
+	# i = 0; 
+	# while (i < 5): 
+	# 	face_data3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrain", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrainlabels")
+	# 	face_data_validation3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidation", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidationlabels")
+	# 	perceptron3 = Perceptron([],[],[]) 	
+
+	# 	totals, time_list_face = perceptron3.get_percentage_of_train_face(face_data3.X, face_data3.y, face_data_validation3.X, face_data_validation3.y)
+	# 	print("face totals of " + str(i) + " " + str(totals))
+	# 	print("face times of " + str(i) + " " + str(time_list_face))
+	# 	print('\n')
 
 
-	# face_data3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrain", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatatrainlabels")
-	# face_data_validation3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidation", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/facedata/facedatavalidationlabels")
-	# perceptron3 = Perceptron([],[],[]) 	
+	# 	digit_data3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/trainingimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/traininglabels")
+	# 	digit_data_validation3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationlabels")
+	# 	perceptron_digit = Perceptron([],[],[])
 
-	# totals = perceptron3.get_percentage_of_train_face(face_data3.X, face_data3.y, face_data_validation3.X, face_data_validation3.y)
-	# print(totals)
+	# 	totals_digit, time_list_digit = perceptron_digit.get_percentage_of_train_digit(digit_data3.X, digit_data3.y, digit_data_validation3.X, digit_data_validation3.y)
+	# 	print("digit totals of " + str(i) + " " + str(totals_digit))
+	# 	print("digit times of " + str(i) + " " + str(time_list_digit))
+	# 	print('\n')
 
-	digit_data3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/trainingimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/traininglabels")
-	digit_data_validation3 = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationlabels")
-	perceptron_digit = Perceptron([],[],[])
+	# 	i = i + 1
 
-	totals_digit = perceptron_digit.get_percentage_of_train_digit(digit_data3.X, digit_data3.y, digit_data_validation3.X, digit_data_validation3.y)
-	print(totals_digit)
-
-	# digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/trainingimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/traininglabels")
-	# # create structure
-	# perceptron_digit = Perceptron([],[],[]) 
-	# correctd = perceptron_digit.train_digit(digit_data.X, digit_data.y)
-	# print("The percentage correct on training data is " + correctd)
-	# print('\n')
+	digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/trainingimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/traininglabels")
+	# create structure
+	perceptron_digit = Perceptron([],[],[]) 
+	correctd = perceptron_digit.train_digit(digit_data.X, digit_data.y)
+	print("The percentage correct on training data is " + correctd)
+	print('\n')
 
 
-	# digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationlabels")
-	# # create structure
-	# correctVd = perceptron_digit.predict_digit(digit_data.X, digit_data.y)
-	# print("The percentage correct on validation data is " + correctVd)
-	# print('\n')
+	digit_data = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/validationlabels")
+	# create structure
+	correctVd = perceptron_digit.predict_digit(digit_data.X, digit_data.y)
+	print("The percentage correct on validation data is " + correctVd)
+	print('\n')
 
 
-	# # digit test data
-	# test_digits = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/testimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/testlabels")
-	# correct_test_d = perceptron_digit.predict_digit(test_digits.X, test_digits.y)
-	# print("The percentage correct on digit test data is " + correct_test_d)
-	# print('\n')
+	# digit test data
+	test_digits = PreProcessor("/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/testimages", "/Users/nicolascarchio/Desktop/AI_FinalProj/data/digitdata/testlabels")
+	correct_test_d = perceptron_digit.predict_digit(test_digits.X, test_digits.y)
+	print("The percentage correct on digit test data is " + correct_test_d)
+	print('\n')
 
 
 
